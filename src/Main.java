@@ -1,4 +1,5 @@
 import movie.MovieManager;
+import MembershipManagement.*;
 
 import java.util.*;
 
@@ -14,6 +15,7 @@ public class Main {
             System.out.println("1. 최현태 - 회원관리");
             System.out.println("2. 황민우 - 가계부");
             System.out.println("3. 최지훈 - TV 프로그램 관리");
+            System.out.println("4. 김예인 - 회원관리");
             System.out.println("X. 종료");
             System.out.print("선택: ");
 
@@ -34,6 +36,10 @@ public class Main {
                     tvManager.start();
                     break;
 
+                case "4":
+                	MembershipManagement_yein.membershipMain(scanner);
+                	break;
+                    
                 case "X":
                     return;
 
