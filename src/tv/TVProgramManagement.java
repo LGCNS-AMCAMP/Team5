@@ -5,6 +5,44 @@ import java.util.*;
 public class TVProgramManagement {
     private List<TVProgram> programs = new ArrayList<>();
     private Set<String> programIds = new HashSet<>();
+    private final Scanner scanner;
+
+    public TVProgramManagement(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public void start() {
+        while (true) {
+            System.out.println("\nTV 프로그램 관리 시스템");
+            System.out.println("1. 프로그램 추가");
+            System.out.println("2. 프로그램 목록 보기");
+            System.out.println("3. 프로그램 삭제");
+            System.out.println("4. 프로그램 검색");
+            System.out.println("X. 메인으로");
+            System.out.print("선택: ");
+
+            String choice = scanner.nextLine().trim().toUpperCase();
+
+            switch (choice) {
+                case "1":
+                    addProgram(scanner);
+                    break;
+                case "2":
+                    listPrograms();
+                    break;
+                case "3":
+                    deleteProgram(scanner);
+                    break;
+                case "4":
+                    searchPrograms(scanner);
+                    break;
+                case "X":
+                    return;
+                default:
+                    System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
+            }
+        }
+    }
 
     public void addProgram(Scanner scanner) {
         System.out.print("프로그램 ID: ");
