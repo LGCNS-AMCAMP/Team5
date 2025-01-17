@@ -58,7 +58,6 @@ public class DiaryMain {
                     break;
                 case 7:
                     System.out.println("일기 프로그램을 종료합니다.");
-                    sc.close();
                     return;
                 default:
                     System.out.println("메뉴가 잘못 입력되었습니다. 다시 입력해주세요.");
