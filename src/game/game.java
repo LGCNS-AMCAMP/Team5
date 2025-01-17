@@ -1,34 +1,36 @@
 public class Game {
-    private String id;
-    private String name;
-    private String released;
-    private String rating;
+    private String id;        // 게임 ID
+    private String title;     // 게임 제목
+    private String genre;     // 장르
+    private double rating;    // 평점
 
-    public Game(String id, String name, String released, String rating) {
+    public Game(String id, String title, String genre, double rating) {
         this.id = id;
-        this.name = name;
-        this.released = released;
+        this.title = title;
+        this.genre = genre;
         this.rating = rating;
     }
 
+    // Getter 메서드
     public String getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public String getReleased() {
-        return released;
+    public String getGenre() {
+        return genre;
     }
 
-    public String getRating() {
+    public double getRating() {
         return rating;
     }
 
+    // toString 메서드 (출력 형식 지정)
     @Override
     public String toString() {
-        return String.format("ID: %s, Name: %s, Released: %s, Rating: %s", id, name, released, rating);
+        return String.format("ID: %s, Title: %s, Genre: %s, Rating: %.1f", id, title, genre, rating);
     }
 }
