@@ -73,7 +73,7 @@ public class DiaryManagement {
             return;
         }
 
-        System.out.println("\n[id]\t[날짜]\t[제목]");
+        System.out.println("\n[id]\t[날짜]\t[제목]\t[해시태그]");
         diaries.forEach(System.out::println);
     }
 
