@@ -1,3 +1,5 @@
+package diary;
+
 public class DiaryException {
     // 날짜 형식 불일치 예외
     public static class DateFormatMismatchException extends Exception {

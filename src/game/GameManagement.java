@@ -1,3 +1,5 @@
+package game;
+
 import java.util.*;
 
 public class GameManagement {
@@ -98,7 +100,7 @@ public class GameManagement {
         // 게임 목록에서 키워드와 일치하는 제목 또는 장르 찾기
         for (Game game : savedGames) {
             if (game.getTitle().toLowerCase().contains(keyword) ||
-                game.getGenre().toLowerCase().contains(keyword)) {
+                    game.getGenre().toLowerCase().contains(keyword)) {
                 System.out.println(game);
                 found = true;
             }
@@ -139,42 +141,3 @@ public class GameManagement {
         management.start();
     }
 }
-
-/**
- * Game 클래스
- */
-class VideoGame {
-    private String id;
-    private String title;
-    private String genre;
-    private double rating;
-
-    public VideoGame (String id, String title, String genre, double rating) {
-        this.id = id;
-        this.title = title;
-        this.genre = genre;
-        this.rating = rating;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s (ID: %s, 장르: %s, 평점: %.1f)", title, id, genre, rating);
-    }
-}
-

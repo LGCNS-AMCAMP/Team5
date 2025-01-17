@@ -1,3 +1,5 @@
+package game;
+
 public class Game {
     private String id;        // 게임 ID
     private String title;     // 게임 제목
