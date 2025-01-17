@@ -19,7 +19,7 @@ public class Main {
             System.out.println("1. 최현태 - 영화 관리 시스템");
             System.out.println("2. 황민우 - 가계부 관리 시스템");
             System.out.println("3. 최지훈 - TV 프로그램 관리 시스템");
-            System.out.println("4. 황지민 - 도서 관리 시스템");
+            System.out.println("4. 황지민 - 일기 관리 시스템");
             System.out.println("5. 김예인 - 회원 관리 시스템");
             System.out.println("6. 박하은 - 게임 관리 시스템");
             System.out.println("7. 최호경 - 재고 관리 시스템");
