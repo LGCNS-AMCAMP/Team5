@@ -1,207 +1,180 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class GameManagement {
-    private static final String API_KEY = "*"; // RAWG API 키를 여기에 입력
     private List<Game> savedGames = new ArrayList<>();
-    private Map<String, String> gameReviews = new HashMap<>();
-    private Map<String, Integer> gameViews = new HashMap<>(); // 게임 조회수 관리
+    private Set<String> gameIds = new HashSet<>();
+    private final Scanner scanner;
 
-    // 게임 검색
-    public void searchGames(Scanner scanner) {
-        System.out.print("검색할 게임 키워드를 입력하세요: ");
-        String keyword = scanner.nextLine();
+    public GameManagement(Scanner scanner) {
+        this.scanner = scanner;
+    }
 
-        try {
-            String apiUrl = "https://api.rawg.io/api/games?key=" + API_KEY + "&search=" + keyword;
-            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
-            conn.setRequestMethod("GET");
+    public void start() {
+        while (true) {
+            System.out.println("\n게임 관리 시스템");
+            System.out.println("1. 게임 추가");
+            System.out.println("2. 저장된 게임 목록 보기");
+            System.out.println("3. 게임 삭제");
+            System.out.println("4. 게임 검색");
+            System.out.println("X. 종료");
+            System.out.print("선택: ");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
+            String choice = scanner.nextLine().trim().toUpperCase();
+
+            switch (choice) {
+                case "1":
+                    addGame();
+                    break;
+                case "2":
+                    listSavedGames();
+                    break;
+                case "3":
+                    deleteGame();
+                    break;
+                case "4":
+                    searchGames();
+                    break;
+                case "X":
+                    System.out.println("프로그램을 종료합니다.");
+                    return;
+                default:
+                    System.out.println("잘못된 입력입니다. 다시 선택해주세요.");
             }
-            reader.close();
-
-            JSONObject jsonResponse = new JSONObject(response.toString());
-            JSONArray results = jsonResponse.getJSONArray("results");
-
-            for (int i = 0; i < results.length(); i++) {
-                JSONObject game = results.getJSONObject(i);
-                String name = game.getString("name");
-                String released = game.optString("released", "N/A");
-                String rating = game.optString("rating", "N/A");
-
-                System.out.printf("%d. %s (Released: %s, Rating: %s)\n", i + 1, name, released, rating);
-            }
-
-            System.out.println("\n위 게임 중 저장할 게임 번호를 입력하세요 (저장하지 않으려면 0): ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            if (choice > 0 && choice <= results.length()) {
-                JSONObject selectedGame = results.getJSONObject(choice - 1);
-                String id = String.valueOf(selectedGame.get("id")); // id를 문자열로 변환
-                String name = selectedGame.getString("name");
-                String released = selectedGame.optString("released", "N/A");
-                String rating = selectedGame.optString("rating", "N/A");
-
-                Game game = new Game(id, name, released, rating);
-                savedGames.add(game);
-                gameViews.put(game.getId(), 0); // 초기 조회수 0으로 설정
-                System.out.println("게임이 저장되었습니다: " + game);
-            }
-
-        } catch (Exception e) {
-            System.out.println("API 요청 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
+    /**
+     * 게임 추가
+     */
+    public void addGame() {
+        System.out.print("게임 ID: ");
+        String id = scanner.nextLine();
 
-    // 저장된 게임 목록 보기
+        // 게임 ID 중복 체크
+        if (gameIds.contains(id)) {
+            System.out.println("이미 등록된 게임 ID입니다.");
+            return;
+        }
+
+        System.out.print("게임 제목: ");
+        String title = scanner.nextLine();
+
+        System.out.print("장르: ");
+        String genre = scanner.nextLine();
+
+        System.out.print("평점 (0.0 ~ 5.0): ");
+        double rating = scanner.nextDouble();
+        scanner.nextLine(); // 버퍼 정리
+
+        // Game 객체 생성 및 등록
+        Game game = new Game(id, title, genre, rating);
+        savedGames.add(game);
+        gameIds.add(id);
+        System.out.println("게임이 등록되었습니다: " + game);
+    }
+
+    /**
+     * 저장된 게임 목록 보기
+     */
     public void listSavedGames() {
         if (savedGames.isEmpty()) {
-            System.out.println("저장된 게임이 없습니다.");
+            System.out.println("등록된 게임이 없습니다.");
             return;
         }
+        // 모든 게임 출력
+        System.out.println("\n===== 저장된 게임 목록 =====");
+        savedGames.forEach(System.out::println);
+    }
 
+    /**
+     * 게임 검색
+     * 제목 또는 장르에 사용자가 입력한 키워드가 포함된 게임을 검색
+     */
+    public void searchGames() {
+        System.out.print("검색어를 입력하세요 (제목/장르): ");
+        String keyword = scanner.nextLine().toLowerCase();
+        boolean found = false;
+
+        // 게임 목록에서 키워드와 일치하는 제목 또는 장르 찾기
         for (Game game : savedGames) {
-            System.out.println(game);
-            // 조회수 증가
-            gameViews.put(game.getId(), gameViews.getOrDefault(game.getId(), 0) + 1);
-        }
-    }
-
-    // 게임 리뷰 추가
-    public void addReview(Scanner scanner) {
-        if (savedGames.isEmpty()) {
-            System.out.println("리뷰를 추가할 게임이 없습니다.");
-            return;
-        }
-
-        System.out.println("리뷰를 추가할 게임을 선택하세요:");
-        for (int i = 0; i < savedGames.size(); i++) {
-            System.out.printf("%d. %s\n", i + 1, savedGames.get(i).getName());
-        }
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        if (choice > 0 && choice <= savedGames.size()) {
-            Game game = savedGames.get(choice - 1);
-            System.out.println("리뷰를 입력하세요:");
-            String review = scanner.nextLine();
-            gameReviews.put(game.getId(), review);
-            System.out.println("리뷰가 저장되었습니다.");
-        } else {
-            System.out.println("잘못된 선택입니다.");
-        }
-    }
-
-    // 게임 리뷰 보기
-    public void viewReviews() {
-        if (gameReviews.isEmpty()) {
-            System.out.println("저장된 리뷰가 없습니다.");
-        } else {
-            for (Map.Entry<String, String> entry : gameReviews.entrySet()) {
-                savedGames.stream()
-                        .filter(game -> game.getId().equals(entry.getKey()))
-                        .forEach(game -> System.out.printf("게임: %s\n리뷰: %s\n", game.getName(), entry.getValue()));
+            if (game.getTitle().toLowerCase().contains(keyword) ||
+                game.getGenre().toLowerCase().contains(keyword)) {
+                System.out.println(game);
+                found = true;
             }
         }
-    }
 
- 
-    // 리뷰 수정
-    public void updateReview(Scanner scanner) {
-        if (savedGames.isEmpty()) {
-            System.out.println("리뷰를 수정할 게임이 없습니다.");
-            return;
-        }
-
-        System.out.println("리뷰를 수정할 게임을 선택하세요:");
-        for (int i = 0; i < savedGames.size(); i++) {
-            System.out.printf("%d. %s\n", i + 1, savedGames.get(i).getName());
-        }
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        if (choice > 0 && choice <= savedGames.size()) {
-            Game game = savedGames.get(choice - 1);
-            System.out.println("새로운 리뷰를 입력하세요:");
-            String newReview = scanner.nextLine();
-            gameReviews.put(game.getId(), newReview); // 기존 리뷰 덮어쓰기
-            System.out.println("리뷰가 수정되었습니다.");
-        } else {
-            System.out.println("잘못된 선택입니다.");
+        if (!found) {
+            System.out.println("검색 결과가 없습니다.");
         }
     }
 
-    // 게임 삭제
-    public void deleteGame(Scanner scanner) {
-        if (savedGames.isEmpty()) {
-            System.out.println("삭제할 게임이 없습니다.");
-            return;
-        }
+    /**
+     * 게임 삭제
+     */
+    public void deleteGame() {
+        System.out.print("삭제할 게임 ID를 입력하세요: ");
+        String id = scanner.nextLine();
 
-        System.out.println("삭제할 게임을 선택하세요:");
-        for (int i = 0; i < savedGames.size(); i++) {
-            System.out.printf("%d. %s\n", i + 1, savedGames.get(i).getName());
-        }
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        if (choice > 0 && choice <= savedGames.size()) {
-            Game game = savedGames.get(choice - 1);
-            savedGames.remove(game);
-            gameViews.remove(game.getId());
-            gameReviews.remove(game.getId());
-            System.out.println("게임이 삭제되었습니다.");
-        } else {
-            System.out.println("잘못된 선택입니다.");
-        }
-    }  
-    
-    // 인기 게임 보기 (평점 순 정렬)
-    public void viewPopularGames() {
-        try {
-            String apiUrl = "https://api.rawg.io/api/games?key=" + API_KEY + "&ordering=-rating";
-            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
-            conn.setRequestMethod("GET");
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
+        // 게임 ID에 해당하는 게임 삭제
+        Iterator<Game> iterator = savedGames.iterator();
+        while (iterator.hasNext()) {
+            Game game = iterator.next();
+            if (game.getId().equals(id)) {
+                iterator.remove();
+                gameIds.remove(id);
+                System.out.println("게임이 삭제되었습니다: " + game);
+                return;
             }
-            reader.close();
-
-            JSONObject jsonResponse = new JSONObject(response.toString());
-            JSONArray results = jsonResponse.getJSONArray("results");
-
-            System.out.println("\n===== 평점 순 인기 게임 목록 =====");
-            for (int i = 0; i < Math.min(10, results.length()); i++) { // 최대 10개만 출력
-                JSONObject game = results.getJSONObject(i);
-                String name = game.getString("name");
-                String rating = game.optString("rating", "N/A");
-                String released = game.optString("released", "N/A");
-
-                System.out.printf("%d. %s (평점: %s, 출시일: %s)\n", i + 1, name, rating, released);
-            }
-
-        } catch (Exception e) {
-            System.out.println("API 요청 중 오류가 발생했습니다: " + e.getMessage());
         }
+        System.out.println("해당 ID의 게임을 찾을 수 없습니다.");
+    }
+
+    /**
+     * 프로그램 실행 진입점
+     */
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        GameManagement management = new GameManagement(scanner);
+        management.start();
     }
 }
+
+/**
+ * Game 클래스
+ */
+class VideoGame {
+    private String id;
+    private String title;
+    private String genre;
+    private double rating;
+
+    public VideoGame (String id, String title, String genre, double rating) {
+        this.id = id;
+        this.title = title;
+        this.genre = genre;
+        this.rating = rating;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (ID: %s, 장르: %s, 평점: %.1f)", title, id, genre, rating);
+    }
+}
+
