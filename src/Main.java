@@ -2,6 +2,8 @@ import movie.MovieManager;
 
 import java.util.*;
 
+import houseHoldAccount.HwangMiniProject;
+
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -9,6 +11,7 @@ public class Main {
         while (true) {
             System.out.println("\n=== 프로그램 선택 ===");
             System.out.println("1. 최현태 - 회원관리");
+            System.out.println("2. 황민우 - 가계부");
             System.out.println("X. 종료");
             System.out.print("선택: ");
 
@@ -21,6 +24,7 @@ public class Main {
                     break;
 
                 case "2":
+                	HwangMiniProject.hwangMenu();
                     break;
 
                 case "X":
